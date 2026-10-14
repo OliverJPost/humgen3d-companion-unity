@@ -1,0 +1,11 @@
+{
+  "name": "HumGen3D.Companion.Editor",
+  "rootNamespace": "HumGen3D.Companion",
+  "references": [],
+  "includePlatforms": ["Editor"],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "noEngineReferences": false
+}
