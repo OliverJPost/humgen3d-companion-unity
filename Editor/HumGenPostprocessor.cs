@@ -254,10 +254,12 @@ namespace HumGen3D.Companion
             var metallic = LoadTexture(exportMaterial, "metallic_smoothness");
             var flow = kind == MaterialKind.Cards && options.hairShading == HairShading.HairShader ? LoadTexture(exportMaterial, "flow") : null;
             var skin = exportMaterial.IsSkin;
+            // [eye shader]
+            var eyes = HumGenEyes.Wanted(exportMaterial, options);
             switch (DetectPipeline())
             {
                 case Pipeline.Universal:
-                    SetUpUniversal(material, kind, baseColor, normal, metallic, flow, skin, options);
+                    SetUpUniversal(material, kind, baseColor, normal, metallic, flow, skin, eyes, options);
                     break;
                 case Pipeline.HighDefinition:
                     SetUpHighDefinition(material, kind, baseColor, normal, metallic, skin, options);
@@ -345,7 +347,7 @@ namespace HumGen3D.Companion
             }
         }
 
-        static void SetUpUniversal(Material m, MaterialKind kind, Texture baseColor, Texture normal, Texture metallic, Texture flow, bool skin, HumGenImportOptions options)
+        static void SetUpUniversal(Material m, MaterialKind kind, Texture baseColor, Texture normal, Texture metallic, Texture flow, bool skin, bool eyes, HumGenImportOptions options)
         {
             // The cards are shaded as hair when the export has their flow map. Otherwise, as
             // URP/Lit lights a back face with the normal of the front, they get the package's
@@ -362,6 +364,9 @@ namespace HumGen3D.Companion
             // The skin gets the package's skin shader, which has the property set of Lit
             if (skin && options.skinShading == SkinShading.SkinShader)
                 packageShader = Shader.Find(SkinUrpShader);
+            // [eye shader]
+            if (eyes)
+                packageShader = HumGenEyes.Find();
             m.shader = packageShader != null ? packageShader : Shader.Find("Universal Render Pipeline/Lit");
             SetTexture(m, "_BaseMap", baseColor);
             SetTexture(m, "_FlowMap", flow);

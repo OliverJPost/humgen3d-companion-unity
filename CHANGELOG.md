@@ -2,6 +2,13 @@
 
 ## 0.8.0
 
+- URP: the eyes (`eyes` in the manifest) get the shipped `Human Generator 3D/Eye URP` shader
+  instead of URP/Lit: the iris is sampled where the view ray refracted at the cornea meets it,
+  so it shifts and bulges with the view angle; the lights and the environment reflect off the
+  smooth cornea (the mesh normal) at the reflectance of water, so the glint stays sharp and the
+  pupil stays dark; the limbus is darkened and the pupil size is a material property. The
+  shader has the property names of URP/Lit and is SRP Batcher compatible. *Eye Shader* or
+  *Lit* under *Eyes* in the import settings.
 - Materials without a metallic-smoothness map get the plain roughness and metallic the manifest
   lists for them (`values`, written by Human Generator after 4.0.32): the eyes have a roughness
   of 0.1 and were imported with Unity's default smoothness of 0.5, so they looked matte. Older

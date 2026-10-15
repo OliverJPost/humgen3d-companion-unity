@@ -48,6 +48,7 @@ maps:
 | Hair cards (`hair_cards`) | `Human Generator 3D/Hair Cutout` (shipped in `Shaders/`), cutoff 0.5, `Cull Off`, alpha to mask | `Human Generator 3D/Hair URP` (shipped in `Shaders/`, see below) with the flow map of the cards, alpha clip 0.5, render face both, alpha to mask; `Human Generator 3D/Hair Cutout URP` without the map | alpha clipping 0.5, double-sided, alpha to mask |
 | Hair caps (`haircap`, `face_haircap`) | rendering mode Fade | the Hair Cap URP shader: dithered alpha (URP 17 does not draw a blended skinned cap, see below) | surface type Transparent |
 | Skin (`skin`) | | `Human Generator 3D/Skin URP` (shipped in `Shaders/`, see below), smoothness 0.7 | material type Subsurface Scattering with a diffusion profile registered in the project, standard without one (see below) |
+| Eyes (`eyes`) | | `Human Generator 3D/Eye URP` (shipped in `Shaders/`, see below) | |
 
 A material without a metallic-smoothness map gets the plain roughness and metallic its manifest
 entry lists (`values`): the eyes of the export have a roughness of 0.1, so they are as wet in

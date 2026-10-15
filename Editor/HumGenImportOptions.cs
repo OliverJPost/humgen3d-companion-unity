@@ -51,6 +51,8 @@ namespace HumGen3D.Companion
         public SkinShading skinShading = SkinShading.SkinShader;
         /// <summary>Multiplier of the smoothness map of the skin in URP.</summary>
         [Range(0f, 1f)] public float skinSmoothness = 0.7f;
+        // [eye shader]
+        public EyeShading eyeShading = EyeShading.EyeShader;
 
         public HumGenImportOptions Clone()
         {
@@ -89,6 +91,10 @@ namespace HumGen3D.Companion
                 EditorGUILayout.LabelField("Skin (URP, HDRP)", EditorStyles.boldLabel);
                 skinShading = (SkinShading)EditorGUILayout.EnumPopup(new GUIContent("Shader", "Skin Shader: in URP the package's Skin URP shader, with light scattered under the skin; in HDRP the Subsurface Scattering material type with a diffusion profile registered in the project. Lit: Universal Render Pipeline/Lit, or the standard material type in HDRP."), skinShading);
                 skinSmoothness = EditorGUILayout.Slider(new GUIContent("Smoothness", "URP: multiplier of the smoothness map of the skin. At 1 the skin looks oiled."), skinSmoothness, 0f, 1f);
+                // [eye shader]
+                EditorGUILayout.Space(4);
+                EditorGUILayout.LabelField("Eyes (URP)", EditorStyles.boldLabel);
+                eyeShading = (EyeShading)EditorGUILayout.EnumPopup(new GUIContent("Shader", "Eye Shader: the package's Eye URP shader, with the iris refracted behind the cornea and the glint off the cornea. Lit: Universal Render Pipeline/Lit."), eyeShading);
             }
         }
     }
