@@ -104,6 +104,12 @@ Shader "Human Generator 3D/Hair URP"
 
     SubShader
     {
+        // Skipped in a project without URP, so the includes below do not
+        // fail to compile there; the Built-in pipeline uses its own shaders
+        PackageRequirements
+        {
+            "com.unity.render-pipelines.universal": "14.0"
+        }
         Tags
         {
             "RenderType" = "TransparentCutout"
@@ -613,5 +619,6 @@ Shader "Human Generator 3D/Hair URP"
         }
     }
 
-    FallBack "Hidden/Universal Render Pipeline/FallbackError"
+    // The error shader of every project, the URP one does not exist without URP
+    FallBack "Hidden/InternalErrorShader"
 }

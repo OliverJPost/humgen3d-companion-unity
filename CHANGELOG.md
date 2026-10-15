@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.1
+
+- The URP shaders no longer fail to compile in a project without the Universal Render Pipeline
+  package ("Couldn't open include file ...DOTS.hlsl" on every import in a Built-in or HDRP
+  project): their SubShaders require the package and are skipped without it.
+
 ## 0.7.0
 
 - The companion sets up an export only through its manifest, the `<Name>.humgen3d.json` file
