@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.0
+
+- Materials without a metallic-smoothness map get the plain roughness and metallic the manifest
+  lists for them (`values`, written by Human Generator after 4.0.32): the eyes have a roughness
+  of 0.1 and were imported with Unity's default smoothness of 0.5, so they looked matte. Older
+  manifests leave the defaults as before.
+
 ## 0.7.2
 
 - HDRP: the skin is no longer magenta. HDRP draws a Subsurface Scattering material magenta unless

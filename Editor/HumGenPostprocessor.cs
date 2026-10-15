@@ -46,7 +46,7 @@ namespace HumGen3D.Companion
         // with a fraction of the specular an engine gives a dielectric, at 1 the skin looked oiled.
 
         /// <summary>Bump when the import result changes, so cached imports are redone.</summary>
-        public override uint GetVersion() => 10;
+        public override uint GetVersion() => 11;
 
         /// <summary>Run after Unity's own material description preprocessors (Built-in 0, URP and HDRP 2).</summary>
         public override int GetPostprocessOrder() => 100;
@@ -266,6 +266,26 @@ namespace HumGen3D.Companion
                     SetUpBuiltIn(material, kind, baseColor, normal, metallic, options);
                     break;
             }
+            if (metallic == null)
+                SetValues(material, exportMaterial);
+        }
+
+        /// <summary>
+        /// The roughness and metallic of a material that has them as plain values instead of a
+        /// map (the eyes, clothing without a roughness map): Unity's default smoothness of 0.5
+        /// made the wet eyes of the export matte.
+        /// </summary>
+        static void SetValues(Material m, ExportMaterial exportMaterial)
+        {
+            if (exportMaterial.Values.ContainsKey("roughness"))
+            {
+                var smoothness = 1f - Mathf.Clamp01(exportMaterial.Value("roughness", 0.5f));
+                SetFloatIfPresent(m, "_Smoothness", smoothness);
+                // Standard: the smoothness without a map
+                SetFloatIfPresent(m, "_Glossiness", smoothness);
+            }
+            if (exportMaterial.Values.ContainsKey("metallic"))
+                SetFloatIfPresent(m, "_Metallic", Mathf.Clamp01(exportMaterial.Value("metallic", 0f)));
         }
 
         Texture LoadTexture(ExportMaterial material, string pass)

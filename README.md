@@ -49,6 +49,10 @@ maps:
 | Hair caps (`haircap`, `face_haircap`) | rendering mode Fade | the Hair Cap URP shader: dithered alpha (URP 17 does not draw a blended skinned cap, see below) | surface type Transparent |
 | Skin (`skin`) | | `Human Generator 3D/Skin URP` (shipped in `Shaders/`, see below), smoothness 0.7 | material type Subsurface Scattering with a diffusion profile registered in the project, standard without one (see below) |
 
+A material without a metallic-smoothness map gets the plain roughness and metallic its manifest
+entry lists (`values`): the eyes of the export have a roughness of 0.1, so they are as wet in
+Unity as in Blender instead of at the default smoothness of 0.5.
+
 The cutoff is the half alpha Unity defaults to: the export bakes the strand coverage of the hair
 atlas into the alpha of the card textures, full strands with anti-aliased edges. Alpha to mask only
 has an effect when the camera renders with MSAA.

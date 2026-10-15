@@ -27,6 +27,8 @@ namespace HumGen3D.Companion
         public string Type;
         /// <summary>Project-relative path of the texture file of each pass (base_color, normal, ...); embedded textures are left out.</summary>
         public Dictionary<string, string> Textures = new Dictionary<string, string>();
+        /// <summary>The inputs of the material that are a plain value instead of a map: roughness, metallic, specular (0 to 1, Blender's scale).</summary>
+        public Dictionary<string, float> Values = new Dictionary<string, float>();
 
         public bool IsSkin => Type == "skin";
 
@@ -48,6 +50,13 @@ namespace HumGen3D.Companion
         {
             string path;
             return Textures.TryGetValue(pass, out path) ? path : null;
+        }
+
+        /// <summary>A plain value of the material, or the fallback when the manifest has none.</summary>
+        public float Value(string name, float fallback)
+        {
+            float value;
+            return Values.TryGetValue(name, out value) ? value : fallback;
         }
     }
 
@@ -138,6 +147,11 @@ namespace HumGen3D.Companion
                             if (file != null)
                                 result.Textures[texture.Key] = file;
                         }
+                    var values = Get(material, "values");
+                    if (values != null)
+                        foreach (var value in values)
+                            if (value.Value is double number)
+                                result.Values[value.Key] = (float)number;
                     manifest.Materials[entry.Key] = result;
                 }
             }
