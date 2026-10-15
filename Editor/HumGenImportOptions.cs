@@ -23,9 +23,9 @@ namespace HumGen3D.Companion
 
     public enum SkinShading
     {
-        /// <summary>The package's Skin URP shader.</summary>
+        /// <summary>The package's Skin URP shader; in HDRP the Subsurface Scattering material type with a diffusion profile registered in the project.</summary>
         SkinShader = 0,
-        /// <summary>Universal Render Pipeline/Lit.</summary>
+        /// <summary>Universal Render Pipeline/Lit; in HDRP the standard material type.</summary>
         Lit = 1,
     }
 
@@ -86,9 +86,9 @@ namespace HumGen3D.Companion
                 hairCutoff = EditorGUILayout.Slider(new GUIContent("Card Cutoff", "Alpha below which a hair card texel is cut out, also the reference of the coverage-preserving mipmaps."), hairCutoff, 0f, 1f);
                 haircap = (HaircapSetup)EditorGUILayout.EnumPopup(new GUIContent("Haircap", "Set Up: faded (Built-in), dithered (URP) or transparent (HDRP) under the cards. As Imported leaves the material as Unity made it."), haircap);
                 EditorGUILayout.Space(4);
-                EditorGUILayout.LabelField("Skin (URP)", EditorStyles.boldLabel);
-                skinShading = (SkinShading)EditorGUILayout.EnumPopup(new GUIContent("Shader", "Skin Shader: the package's Skin URP shader, with light scattered under the skin. Lit: Universal Render Pipeline/Lit."), skinShading);
-                skinSmoothness = EditorGUILayout.Slider(new GUIContent("Smoothness", "Multiplier of the smoothness map of the skin. At 1 the skin looks oiled."), skinSmoothness, 0f, 1f);
+                EditorGUILayout.LabelField("Skin (URP, HDRP)", EditorStyles.boldLabel);
+                skinShading = (SkinShading)EditorGUILayout.EnumPopup(new GUIContent("Shader", "Skin Shader: in URP the package's Skin URP shader, with light scattered under the skin; in HDRP the Subsurface Scattering material type with a diffusion profile registered in the project. Lit: Universal Render Pipeline/Lit, or the standard material type in HDRP."), skinShading);
+                skinSmoothness = EditorGUILayout.Slider(new GUIContent("Smoothness", "URP: multiplier of the smoothness map of the skin. At 1 the skin looks oiled."), skinSmoothness, 0f, 1f);
             }
         }
     }

@@ -1,7 +1,7 @@
 {
   "name": "com.humgen3d.companion",
   "displayName": "Human Generator 3D Companion for Unity",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "unity": "2022.3",
   "description": "Sets up characters exported from Human Generator for Blender the moment Unity imports them: materials for the active render pipeline, normal and metallic-smoothness maps, cutout hair shaded as hair and a skin shader in URP, Humanoid avatar and animation clips.",
   "author": { "name": "Human Generator", "url": "https://humgen3d.com" },

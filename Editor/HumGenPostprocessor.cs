@@ -10,6 +10,7 @@
 // the hair caps as fade and the skin with subsurface scattering in HDRP and the package's
 // skin shader in URP.
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
@@ -429,11 +430,26 @@ namespace HumGen3D.Companion
             if (skin)
             {
                 // Material type Subsurface Scattering: the skin of the export was rendered with
-                // subsurface scattering in Blender and looks flat and harsh without it. No
-                // diffusion profile is assigned, so HDRP uses the default one of the project;
-                // assign a skin profile to the material for the final look.
-                m.SetFloat("_MaterialID", 0f);
-                SetFloatIfPresent(m, "_TransmissionEnable", 0f);
+                // subsurface scattering in Blender and looks flat and harsh without it. HDRP
+                // draws a subsurface material magenta unless its diffusion profile is one of
+                // the profiles registered in the project, so a registered one is assigned, a
+                // skin profile when there is one; without any the skin stays standard.
+                var profile = options.skinShading == SkinShading.SkinShader ? RegisteredDiffusionProfile() : null;
+                if (profile != null)
+                {
+                    m.SetFloat("_MaterialID", 0f);
+                    SetFloatIfPresent(m, "_TransmissionEnable", 0f);
+                    AssignDiffusionProfile(m, profile);
+                }
+                else
+                {
+                    m.SetFloat("_MaterialID", 1f);
+                    if (options.skinShading == SkinShading.SkinShader)
+                        Debug.Log(LogPrefix + "no diffusion profile is registered in the project, so the skin material "
+                            + m.name + " is a standard material. Add a skin profile to the Diffusion Profile List of"
+                            + " the default volume profile (Project Settings > Graphics > HDRP) and reimport for"
+                            + " subsurface scattering.");
+                }
             }
             switch (kind)
             {
@@ -505,6 +521,95 @@ namespace HumGen3D.Companion
                 case Pipeline.HighDefinition: return "HDRP";
                 default: return "Built-in";
             }
+        }
+
+        /// <summary>
+        /// The first diffusion profile registered in the project, a skin profile when there is
+        /// one. HDRP 17 keeps the registered profiles in the Diffusion Profile List of the default
+        /// volume profile, HDRP 14 to 16 in the global settings. Null when none is registered.
+        /// </summary>
+        static UnityEngine.Object RegisteredDiffusionProfile()
+        {
+            var profiles = new List<UnityEngine.Object>();
+            var volumeProfile = DefaultVolumeProfile();
+            var components = volumeProfile != null
+                ? volumeProfile.GetType().GetField("components")?.GetValue(volumeProfile) as System.Collections.IEnumerable
+                : null;
+            if (components != null)
+                foreach (var component in components)
+                {
+                    if (component == null || component.GetType().Name != "DiffusionProfileList")
+                        continue;
+                    var parameter = component.GetType().GetField("diffusionProfiles")?.GetValue(component);
+                    var value = parameter?.GetType().GetProperty("value")?.GetValue(parameter) as System.Collections.IEnumerable;
+                    if (value != null)
+                        foreach (var profile in value)
+                            profiles.Add(profile as UnityEngine.Object);
+                }
+            if (profiles.Count == 0)
+            {
+                var globalType = FindType("UnityEngine.Rendering.HighDefinition.HDRenderPipelineGlobalSettings");
+                var instance = globalType?.GetProperty("instance", BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
+                var list = instance != null ? globalType.GetField("diffusionProfileSettingsList")?.GetValue(instance) as System.Collections.IEnumerable : null;
+                if (list != null)
+                    foreach (var profile in list)
+                        profiles.Add(profile as UnityEngine.Object);
+            }
+            profiles.RemoveAll(profile => profile == null);
+            return profiles.FirstOrDefault(profile => profile.name.IndexOf("skin", StringComparison.OrdinalIgnoreCase) >= 0)
+                ?? profiles.FirstOrDefault();
+        }
+
+        /// <summary>
+        /// What HDMaterial.SetDiffusionProfile sets on the material: the hash of the profile,
+        /// which the shader looks up in the registered list, and the GUID of its asset, which
+        /// the material inspector shows. HDMaterial itself also records the profile among the
+        /// external references of the material, which throws for a material that is being
+        /// imported, so the two properties are set here.
+        /// </summary>
+        static void AssignDiffusionProfile(Material m, UnityEngine.Object profile)
+        {
+            const BindingFlags any = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+            var inner = profile.GetType().GetField("profile", any)?.GetValue(profile);
+            var hashValue = inner?.GetType().GetField("hash", any)?.GetValue(inner);
+            if (hashValue == null)
+                return;
+            m.SetFloat("_DiffusionProfileHash", BitConverter.ToSingle(BitConverter.GetBytes(Convert.ToUInt32(hashValue)), 0));
+            var guid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(profile));
+            if (guid.Length != 32 || !m.HasProperty("_DiffusionProfileAsset"))
+                return;
+            var bytes = new byte[16];
+            for (int i = 0; i < 16; i++)
+                bytes[i] = byte.Parse(guid.Substring(i * 2, 2), System.Globalization.NumberStyles.HexNumber);
+            m.SetVector("_DiffusionProfileAsset", new Vector4(
+                BitConverter.ToSingle(bytes, 0), BitConverter.ToSingle(bytes, 4),
+                BitConverter.ToSingle(bytes, 8), BitConverter.ToSingle(bytes, 12)));
+        }
+
+        static UnityEngine.Object DefaultVolumeProfile()
+        {
+            var settingsType = FindType("UnityEngine.Rendering.HighDefinition.HDRPDefaultVolumeProfileSettings");
+            var getter = typeof(GraphicsSettings).GetMethods(BindingFlags.Public | BindingFlags.Static)
+                .FirstOrDefault(x => x.Name == "GetRenderPipelineSettings" && x.IsGenericMethod && x.GetParameters().Length == 0);
+            if (settingsType == null || getter == null)
+                return null;
+            object settings;
+            try { settings = getter.MakeGenericMethod(settingsType).Invoke(null, null); }
+            catch { return null; }
+            return settings?.GetType().GetProperty("volumeProfile")?.GetValue(settings) as UnityEngine.Object;
+        }
+
+        static Type FindType(string typeName)
+        {
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                Type type;
+                try { type = assembly.GetType(typeName); }
+                catch { continue; }
+                if (type != null)
+                    return type;
+            }
+            return null;
         }
 
         static MethodInfo FindStaticMethod(string typeName, string methodName, int parameterCount)

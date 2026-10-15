@@ -47,7 +47,7 @@ maps:
 | Metallic-smoothness | `_MetallicGlossMap`, metallic 1, smoothness 1 | `_MetallicGlossMap`, metallic 1, smoothness 1, source alpha of the metallic map | `_MaskMap`, occlusion remap pinned to 1 (see below) |
 | Hair cards (`hair_cards`) | `Human Generator 3D/Hair Cutout` (shipped in `Shaders/`), cutoff 0.5, `Cull Off`, alpha to mask | `Human Generator 3D/Hair URP` (shipped in `Shaders/`, see below) with the flow map of the cards, alpha clip 0.5, render face both, alpha to mask; `Human Generator 3D/Hair Cutout URP` without the map | alpha clipping 0.5, double-sided, alpha to mask |
 | Hair caps (`haircap`, `face_haircap`) | rendering mode Fade | the Hair Cap URP shader: dithered alpha (URP 17 does not draw a blended skinned cap, see below) | surface type Transparent |
-| Skin (`skin`) | | `Human Generator 3D/Skin URP` (shipped in `Shaders/`, see below), smoothness 0.7 | material type Subsurface Scattering |
+| Skin (`skin`) | | `Human Generator 3D/Skin URP` (shipped in `Shaders/`, see below), smoothness 0.7 | material type Subsurface Scattering with a diffusion profile registered in the project, standard without one (see below) |
 
 The cutoff is the half alpha Unity defaults to: the export bakes the strand coverage of the hair
 atlas into the alpha of the card textures, full strands with anti-aliased edges. Alpha to mask only
@@ -55,9 +55,15 @@ has an effect when the camera renders with MSAA.
 
 **Skin in HDRP.** The skin of the export was rendered with subsurface scattering in Blender and
 looks flat and harsh without it, so in HDRP the skin material gets the *Subsurface Scattering*
-material type. No diffusion profile is assigned, HDRP then uses the default profile of the
-project; assign a skin profile to the material for the final look. The Built-in pipeline has no
-subsurface scattering in its Standard shader, the skin stays a plain Standard material there.
+material type. HDRP draws a subsurface material magenta unless its diffusion profile is one of
+the profiles registered in the project, so the companion assigns a registered one: the first
+whose name contains "Skin" (the HDRP template registers HDRP's *SkinDiffusionProfile*), else the
+first in the list. The list is the *Diffusion Profile List* of the default volume profile
+(*Project Settings > Graphics > HDRP*; the global settings in HDRP 14 to 16). Without a registered
+profile the skin stays a standard material and the console says so; register a skin profile and
+reimport for subsurface scattering. Pick *Lit* under *Skin* in the import settings for a standard
+material in any case. The Built-in pipeline has no subsurface scattering in its Standard shader,
+the skin stays a plain Standard material there.
 
 **Skin in URP.** URP/Lit has no subsurface scattering either: the skin got a hard, grey line
 where it turns from the light, and the smoothness map at the reflectance Lit gives every

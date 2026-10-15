@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.2
+
+- HDRP: the skin is no longer magenta. HDRP draws a Subsurface Scattering material magenta unless
+  its diffusion profile is registered in the project, and the companion assigned none. The skin
+  now gets a registered profile (a skin profile when there is one, as in the HDRP template), and
+  without any it stays a standard material, with a console line saying how to get subsurface
+  scattering. *Lit* under *Skin* in the import settings now also means the standard material type
+  in HDRP.
+
 ## 0.7.1
 
 - The URP shaders no longer fail to compile in a project without the Universal Render Pipeline
